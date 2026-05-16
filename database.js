@@ -12,6 +12,11 @@ const client = createClient({
   authToken: TURSO_AUTH_TOKEN,
 });
 
+// Test connection on startup
+client.execute('SELECT 1')
+  .then(() => console.log('✓ Turso database connected successfully'))
+  .catch(err => console.error('✗ Turso connection failed:', err.message));
+
 function normalizeParams(params) {
   if (params === undefined) return [];
   if (Array.isArray(params)) return params;

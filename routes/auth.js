@@ -36,13 +36,24 @@ router.post('/login', (req, res) => {
   }
 
   db.get('SELECT * FROM users WHERE email = ?', [email], (err, user) => {
-    if (err || !user) {
+    console.log('Login attempt for:', email);
+    if (err) {
+      console.error('Database error:', err);
+      return res.status(401).json({ error: 'Invalid credentials', debug: err.message });
+    }
+    if (!user) {
+      console.log('User not found:', email);
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     const passwordMatch = bcrypt.compareSync(password, user.password);
     if (!passwordMatch) {
       return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    if (!process.env.JWT_SECRET) {
+      console.error('JWT_SECRET is not set!');
+      return res.status(500).json({ error: 'Server configuration error' });
     }
 
     const token = jwt.sign(
